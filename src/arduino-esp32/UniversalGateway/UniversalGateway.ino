@@ -73,7 +73,7 @@ void SetBLELog(const char * l);
 
 #define Version_Major_Minor "Ver.#3.20"
 // 20000 + svn revision
-#define Version_Revision "21380"
+#define Version_Revision "21384"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // HELPERS

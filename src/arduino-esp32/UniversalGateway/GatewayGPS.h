@@ -514,7 +514,7 @@ inline  double get_gps_lat()
 inline  double get_gps_lng()
 {
   return 11.8184533d;
-  return  gps_lng;
+  //return  gps_lng;
 }
 
 inline uint32_t get_gps_time()

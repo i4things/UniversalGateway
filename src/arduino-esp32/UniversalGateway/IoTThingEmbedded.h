@@ -373,6 +373,7 @@ class IoTThingEmbedded
         LOG64_NEW_LINE;
 #endif
       }
+
     }
 
   public :
@@ -381,12 +382,13 @@ class IoTThingEmbedded
     virtual void data_sent_successfully()
     {
       wait_ack = IoTThing_WAIT_NA;
+
       // ack
       total_ack++;
       if (ack_callback != NULL)
       {
 
-        int16_t rssi_ = (IoTGateway_MIN_RSSI  * (100 - ((int16_t)gateway->signal_strength()))) / 100;
+        int16_t rssi_ = 0; // rssi - 100%
         ack_callback(rssi_);
       }
     }

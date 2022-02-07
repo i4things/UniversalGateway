@@ -73,7 +73,7 @@ void SetBLELog(const char * l);
 
 #define Version_Major_Minor "Ver.#3.20"
 // 20000 + svn revision
-#define Version_Revision "21384"
+#define Version_Revision "21392"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // HELPERS
@@ -117,13 +117,13 @@ inline void hex_to_key(const char src[], uint8_t target[16])
 IoTGateway *gateway;
 
 #include "IoTServerWifi.h"
-IoTServerWifi *server_wifi;
+IoTServerWifi *server_wifi = NULL;
 
 #include "IoTServerGprs.h"
-IoTServerGprs *server_gprs;
+IoTServerGprs *server_gprs = NULL;
 
 #include "IoTThingEmbedded.h"
-IoTThingEmbedded *thing_embedded;
+IoTThingEmbedded *thing_embedded = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////////
 // CALLBACKS
@@ -140,6 +140,7 @@ void dispatch_data(uint8_t buf_[], uint8_t start_index_, uint8_t size_)
 // called when packet received from node
 void received_data(uint8_t buf[], uint8_t size, int16_t rssi)
 {
+  
   total_received++;
 
   uint8_t buf_transport[128];
@@ -164,6 +165,7 @@ void received_data(uint8_t buf[], uint8_t size, int16_t rssi)
 // called when packet received from embedded node
 void received_data_embedded(uint8_t buf[], uint8_t size, int16_t rssi)
 {
+  
   // treat it the same as non embeded
   received_data(buf, size, rssi);
 
@@ -303,8 +305,18 @@ void setup()
   // Embedded Node
   uint8_t thing_key[16];
   hex_to_key(GetSetupNodePrivKey(), thing_key);
+  // dump node priv key
+  LOG64_SET(F("NODE: KEY["));
+  for (uint8_t i = 0; i < 16; i++)
+  {
+    LOG64_SET((uint32_t)thing_key[i]);
+  }
+  LOG64_SET(F("]"));
+  LOG64_NEW_LINE;
+  // end dump
   thing_embedded = NULL;
   thing_embedded = new IoTThingEmbedded(static_cast<uint64_t>( GetSetupNodeId()), thing_key, static_cast<uint64_t>( GetSetupId()), &received_data_embedded);
+  thing_embedded->init();
 
   // Radio Gateway
   uint8_t gateway_key[16];
@@ -327,13 +339,13 @@ void setup()
     init_server_gprs();
   }
 
-  // Node
+  //  // Node
   init_node();
 
   // BLE
   init_ble();
 
-  // Heartbeat
+  //  // Heartbeat
   init_heartbeat();
 
 }

@@ -235,8 +235,8 @@ class IoTGateway
       out_buf_[2] = ((uint8_t*)&magic)[0];
       out_buf_[3] = ((uint8_t*)&magic)[1];
 
-      out_buf_[4] = ((uint8_t*)&rssi)[0];
-      out_buf_[5] = ((uint8_t*)&rssi)[1];
+      out_buf_[4] = ((uint8_t*)&rssi_)[0];
+      out_buf_[5] = ((uint8_t*)&rssi_)[1];
 
       out_buf_[6] = ((uint8_t*)&gateway_id)[0];
       out_buf_[7] = ((uint8_t*)&gateway_id)[1];

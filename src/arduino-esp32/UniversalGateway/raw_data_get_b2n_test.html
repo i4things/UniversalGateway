@@ -1,0 +1,423 @@
+<html>
+<body>
+
+<p><div id="iot_data_send"></div></p>
+
+<p><div id="iot_data_dump"></div></p>
+
+<p><div id="iot_data_hist_dump"></div></p>
+
+<script  src="http://i4things.com/assets/i4t/js/i4things.js"> </script>
+
+
+<script>
+/**********************************************************\
+				  BOAT-VITALS PARSER
+\**********************************************************/
+
+
+function f4f_soil_temp(v)
+{
+        if (v.length > 4)
+		{
+			var ret = (-20.0 + (v[4] * 0.3137));
+			if (ret == -20)
+			{
+				return undefined;
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		
+		return undefined;
+}
+
+function f4f_soil_moisture(v)
+{
+		if (v.length > 5)
+		{
+			var ret =  v[5];
+			if (ret == 0)
+			{
+				return undefined;
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		
+		return undefined;
+}
+
+function f4f_air_temp(v)
+{
+        if (v.length > 6)
+		{
+			var ret = (-20.0 + (v[6] * 0.3137));
+			if (ret == -20)
+			{
+				return undefined;
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		
+		return undefined;
+}
+
+function f4f_air_humidity(v)
+{
+		if (v.length > 7)
+		{
+			var ret =  v[7];
+			if (ret == 0)
+			{
+				return undefined;
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		
+		return undefined;
+}
+
+function f4f_pm(v)
+{
+		if (v.length > 8)
+		{
+			var ret = v[8];
+			if (ret == 0)
+			{
+				return undefined;
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		
+		return undefined;
+}
+
+function f4f_bat(v)
+{
+        if (v.length > 9)
+		{
+			var ret =  (v[9] * 0.0196);
+			if (ret == 0)
+			{
+				return undefined;
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		
+		return undefined;
+}
+
+
+
+
+function f4f_deg(deg, minSec)
+{
+		var rhs = deg + 0.0;
+        var ret_frac = minSec / 1000.0;
+        ret_frac /= 1000000.0;
+        if (deg >= 0)
+        {
+            rhs += ret_frac;
+        }
+        else
+        {
+            rhs -= ret_frac;
+        }
+		
+        return rhs;
+}
+
+function f4f_short(v, i)
+{
+    return ((v[i + 1] > 127) ? v[i + 1] - 255 : v[i + 1]) * 256 + (v[i] & 0xFF); 
+}
+
+function f4f_int(v, i)
+{
+    return ((v[i + 3] > 127) ? v[i + 3] - 255 : v[i + 3]) * 16777216 + (((v[i + 2] & 0xFF) << 16) | ((v[i + 1] & 0xFF) << 8) | (v[i] & 0xFF)); 
+}
+
+function f4f_lat(v)
+{
+        if (v.length > 15)
+		{
+            var deg = f4f_short(v, 10);
+			var minSec = f4f_int(v, 12);
+			if ((deg > 360) || (deg < -360)) 
+			{
+				return undefined;
+			}
+			var ret = f4f_deg(deg, minSec);
+			if (ret == 0)
+			{
+				return undefined;
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		
+		return undefined;
+}
+
+function f4f_lon(v)
+{
+		if (v.length > 21)
+		{
+            var deg = f4f_short(v, 16);
+			var minSec = f4f_int(v, 18);
+			if ((deg > 360) || (deg < -360)) 
+			{
+				return undefined;
+			}
+			var ret = f4f_deg(deg, minSec);
+			if (ret == 0)
+			{
+				return undefined;
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		
+		return undefined;
+}
+
+function f4f_gps_time(v)
+{
+		if (v.length > 3)
+		{
+            var time = f4f_int(v, 0);
+			
+			var ret =  time * 1000;
+			if (ret == 0)
+			{
+				return undefined;
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		
+		return undefined;
+}
+
+
+
+</script>
+
+
+<script>	
+/**********************************************************\
+				  Actual code here - make sure you have the 
+				  same key as in the IoT device
+\**********************************************************/
+
+
+function get_otput(decrypted_data)
+{
+		  var out = "";
+		  
+	      var gps_time =  f4f_gps_time(decrypted_data);
+		  if (gps_time == undefined)
+		  {
+			out += "&nbsp;GPS TIME: N/A <br>";
+		  }
+		  else
+		  {
+			out += "&nbsp;GPS TIME: " + new Date(gps_time) + "<br>";
+		  }
+		  
+		  var soil_temp = f4f_soil_temp(decrypted_data);
+		  if (soil_temp == undefined)
+		  {
+			out += "&nbsp;SOIL TEMP: N/A <br>";
+		  }
+		  else
+		  {
+			out += "&nbsp;SOIL TEMP: " + soil_temp.toFixed(1) + " C<br>";
+		  }
+		  
+		  var soil_moisture = f4f_soil_moisture(decrypted_data);
+		  if (soil_moisture == undefined)
+		  {
+			out += "&nbsp;SOIL MOISTURE: N/A <br>";
+		  }
+		  else
+		  {
+			out += "&nbsp;SOIL MOISTURE " + soil_moisture + " %<br>";
+		  }
+		  
+		  
+		  var air_temp = f4f_air_temp(decrypted_data);
+		  if (air_temp == undefined)
+		  {
+			out += "&nbsp;AIR TEMP: N/A C<br>";
+		  }
+		  else
+		  {
+			out += "&nbsp;AIR TEMP: " + air_temp.toFixed(1) + " C<br>";
+		  }
+		  
+		  var air_humidity = f4f_air_humidity(decrypted_data);
+		  if (air_humidity == undefined)
+		  {
+			out += "&nbsp;AIR HUMIDITY: N/A <br>";
+		  }
+		  else
+		  {
+		    out += "&nbsp;AIR HUMIDITY: " + air_humidity + " %<br>";
+		  }
+		 
+		  var pm = f4f_pm(decrypted_data);
+		  if (pm == undefined)
+		  {
+			out += "&nbsp;AIR PM: N/A <br>";
+		  }
+		  else
+		  {
+			out += "&nbsp;AIR PM: " + pm + " <br>";
+		  }
+		  
+		  var bat = f4f_bat(decrypted_data);
+		  if (bat == undefined)
+		  {
+		  out += "&nbsp;BAT: N/A <br>"
+		  }
+		  else
+		  {
+			out += "&nbsp;BAT: " + bat.toFixed(2) + " v<br>";
+		  }
+		  
+		  var lat = f4f_lat(decrypted_data);
+		  if (lat == undefined)
+		  {
+			out += "&nbsp;LAT: N/A <br>";
+		  }
+		  else
+		  {
+			out += "&nbsp;LAT: " + lat.toFixed(6) + " <br>";
+		  }
+		  
+		  var lon = f4f_lon(decrypted_data);
+		  if (lon == undefined)
+		  {
+			out += "&nbsp;LON: N/A <br>";
+		  }
+		  else
+		  {
+			out += "&nbsp;LON: " + lon.toFixed(6) + " <br>";
+		  }
+		  
+		  return out;
+}
+
+function iot_json_function(data, key) {
+        var json_data = JSON.parse(data);
+		
+		 /**********************************************************\
+					Place your code here
+         \**********************************************************/
+		
+        var out = "Thing: " + json_data.thing + "<br>";
+        for (i = 0; i < json_data.last.length; i++) {
+		  out += "<hr><p>";
+		  
+		  out += "&nbsp;Time: " + new Date(json_data.last[i].t) + "<br>";
+          out += "&nbsp;Signal Strength: " + json_data.last[i].r + "%<br>";
+		  out += "&nbsp;Triangulated Lat: " + json_data.last[i].l + "<br>";
+		  out += "&nbsp;Triangulated Lon: " + json_data.last[i].n + "<br>";
+		 
+		  var decrypted_data = i4things_xxtea_decrypt(json_data.last[i].d, key);
+		  
+		  out += get_otput(decrypted_data);
+		
+          out += "<br>";
+		  out += "<\p>";
+		  
+        }
+ document.getElementById("iot_data_dump").innerHTML = out;
+}
+
+function iot_json_hist_function(data, key) {
+        var json_data = JSON.parse(data);
+		
+		 /**********************************************************\
+					Place your code here
+         \**********************************************************/
+		
+        var out = "Thing: " + json_data.thing + "<br>";
+		    out += "Day Index From History: " + json_data.hist + "<br>";
+        for (i = 0; i < json_data.day.length; i++) {
+		  out += "<hr><p>";
+          out += "&nbsp;Time: " + new Date(json_data.day[i].t) + "<br>";
+          out += "&nbsp;Signal Strength: " + json_data.day[i].r + "%<br>";
+		  
+		  var decrypted_data = i4things_xxtea_decrypt(json_data.day[i].d, key);
+          
+		  out += get_otput(decrypted_data);
+		  
+		  
+          out += "<br>";
+		  out += "<\p>";
+		  
+        }
+		
+ document.getElementById("iot_data_hist_dump").innerHTML = out;
+}
+
+</script>
+
+<script> 
+/**********************************************************\
+				  Can be called from event
+\**********************************************************/
+
+
+var thing_id = 83;
+var thing_network_key = "DC3163E95521F270B479FA2ED34B76D8";
+var thing_private_key = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6 ];
+var yesterday_idx = 0; //up to 60 days available
+		 
+// get todays data		 
+         i4things_load_script("http://server.i4things.com:5408/iot_get/" + i4things_get_data_request(thing_id, thing_network_key) , function() {
+		 /**********************************************************\
+					The Server will return : var iot_json = '{....}';
+         \**********************************************************/
+			iot_json_function(iot_json, thing_private_key);
+		 });
+
+// get hostory data for yesterday - index 0
+//         i4things_load_script("http://server.i4things.com:5408/iot_get_hist/" + i4things_get_data_hist_request(thing_id, yesterday_idx, thing_network_key) , function() {
+//		 /**********************************************************\
+//					The Server will return : var iot_json = '{....}';
+//        \**********************************************************/
+//			iot_json_hist_function(iot_json, thing_private_key);
+//		 });		 
+		
+
+		 
+</script>
+
+</body>
+</html>

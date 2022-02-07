@@ -182,6 +182,7 @@ float BLE_REPORT_FLOAT[BLE_REPORT_COUNT]
   120000.0f,
   150000.0f,
   180000.0f,
+  300000.0f,
   1800000.0f,
   3600000.0f
 };
@@ -273,7 +274,7 @@ const char * BLE_VOLTMETER_OFFSET_STRING[BLE_VOLTMETER_OFFSET_COUNT]
 
 
 #define BLE_SETTING_COUNT 17
-#define BLE_SETTING_DESC_COUNT 14
+#define BLE_SETTING_DESC_COUNT 13
 const char * BLE_SETTING_DESC[BLE_SETTING_DESC_COUNT] =
 {
   "@" BLE_SETTING_DEVICE_NAME "@S16" , // Group: N/A Fields: Device Nameof type STRING - max 16 chars
@@ -911,20 +912,20 @@ inline bool bleGetCommand(uint16_t index, char buf[])
 
   switch (index)
   {
-    case 0 :
+    case 0:
       {
         ble += String(total_received) + BLE_ELEMENT_END;
         break;
       }
     case 1 :
       {
-        if (GetSetupNodeId() == 0)
+        if (GetSetupTransport() == 0)
         {
-          ble += "WiFi : " + String(total_received) + BLE_ELEMENT_END;
+          ble += "WiFi : " + String(total_send) + BLE_ELEMENT_END;
         }
         else
         {
-          ble += "Cellular : " + String(total_received) + BLE_ELEMENT_END;
+          ble += "Cellular : " + String(total_send) + BLE_ELEMENT_END;
         }
         break;
       }
@@ -976,10 +977,9 @@ inline bool bleGetCommand(uint16_t index, char buf[])
         ble += String((gateway == NULL) ? BLE_NA : String(gateway->signal_strength()).c_str()) + "%" +  BLE_ELEMENT_END;
         break;
       }
-
     case 10 :
       {
-        String((server_gprs == NULL) ? BLE_NA : String(server_gprs->signal_strength()).c_str()) + "%" +  BLE_ELEMENT_END;
+        ble += String((server_gprs == NULL) ? BLE_NA : String(server_gprs->signal_strength()).c_str()) + "%" +  BLE_ELEMENT_END;
         break;
       }
     case 11 :

@@ -26,5 +26,4 @@
 #define GPRS_RX_PIN 12
 #define GPRS_TX_PIN 13
 #define GPRS_POWER_CONTROL_PIN 2
-
 #define MONITOR_PIN 25

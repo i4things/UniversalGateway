@@ -27,12 +27,12 @@ inline void init_node()
 
 inline uint32_t last_send()
 {
-   return  ((uint32_t)(((uint32_t)millis()) - node_last_execute));
+  return  ((uint32_t)(((uint32_t)millis()) - node_last_execute));
 }
 
 inline uint32_t next_send()
 {
-   return (GetSetupReportTimeout() - ((uint32_t)(((uint32_t)millis()) - node_last_execute)));
+  return (GetSetupReportTimeout() - ((uint32_t)(((uint32_t)millis()) - node_last_execute)));
 }
 
 inline void send_message_node()
@@ -58,13 +58,18 @@ inline void send_message_node()
 
   buf[size++] = 0;// PM
 
+  float fbat = get_bat();
+  buf[size++] = static_cast<uint8_t>(round_safe((isnan(fbat) ? 0.0f : fbat) / 0.0196f));
+
   LOG64_SET(F("NODE: TIME["));
   LOG64_SET(String(gps_time));
   LOG64_SET(F("] T["));
   LOG64_SET(String(fDegreeCelsius, 1));
   LOG64_SET(F("] H["));
   LOG64_SET(String(fHumidity, 0));
-  LOG64_SET(F("%]"));
+  LOG64_SET(F("%] BAT["));
+  LOG64_SET(String(fbat, 2));
+  LOG64_SET(F("v]"));
 
   double lat = get_gps_lat();
   double lng = get_gps_lng();
@@ -73,8 +78,8 @@ inline void send_message_node()
   {
     int16_t deg_lat = gps_double2degree(lat);
     int32_t min_sec_lat = gps_double2minsec(lat);
-    int16_t deg_lng = gps_double2degree(lat);
-    int32_t min_sec_lng = gps_double2minsec(lat);
+    int16_t deg_lng = gps_double2degree(lng);
+    int32_t min_sec_lng = gps_double2minsec(lng);
 
     buf[size++] = ((uint8_t*)&deg_lat)[0];
     buf[size++] = ((uint8_t*)&deg_lat)[1];
@@ -105,12 +110,19 @@ inline void send_message_node()
 
   if (thing_embedded != NULL)
   {
-    if (thing_embedded->is_ready())
+    if (!thing_embedded->is_ready())
     {
       LOG64_SET(F("NODE: PREV MESSAGE DISCARDED"));
       LOG64_NEW_LINE;
       thing_embedded->cancel();
     }
+
+//    LOG64_SET(F("NODE: MSG:"));
+//    for (uint8_t i = 0; i < size; i++)
+//    {
+//      LOG64_SET((uint32_t)buf[i]);
+//    }
+//    LOG64_NEW_LINE;
 
     if (thing_embedded->send(buf, size))
     {

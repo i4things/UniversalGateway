@@ -21,9 +21,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Defaults
 #define SETUP_DEFAULT_SECRET 86
-#define SETUP_DEFAULT_DEVICE_NAME "Gateway"
-#define SETUP_DEFAULT_ID 5000
-#define SETUP_DEFAULT_KEY "86868686868686868686868686868686"
+#define SETUP_DEFAULT_DEVICE_NAME "B2N_TEST"
+#define SETUP_DEFAULT_ID 4230
+#define SETUP_DEFAULT_KEY "6ACE03FC163A4DBF76F19C2755B1E8B0"
 #define SETUP_DEFAULT_FREQ 868.1f
 #define SETUP_DEFAULT_SERVER "server.i4things.com"
 #define SETUP_DEFAULT_PORT 5409
@@ -41,7 +41,7 @@
 // GPRS
 #define SETUP_DEFAULT_TRANSPORT 1
 
-#define SETUP_DEFAULT_NODE_ID 1000
+#define SETUP_DEFAULT_NODE_ID 83
 #define SETUP_DEFAULT_NODE_PRIV_KEY "06060606060606060606060606060606"
 
 ///////////////////////////////////////////////////////////////////////////////////
